@@ -1,21 +1,6 @@
-# ① LINEからテキストメッセージを受け取る。
-
-# ② 入力値で楽天APIを用いて商品検索を行い、先頭の商品のジャンルを取得する。
-
-# ③ 再び楽天APIを使い、取得したジャンル内で、入力値でランキングを取得する。（※1）
-
-# ④ 取得したランキングの１〜３位までの「商品概要」・「画像URL」・「価格」・「商品のリンク」を使い、Flex Message（※2）で決められた形式にする。
-
-# ⑤ ④をリプライとして返す。
-
-# ※1 楽天APIの仕様上、全てのジャンルでのランキングは取得できないため、このような実装としています。
-
-# ※2 LINEの返信で、複数の要素を組み合わせてレイアウトを自由にカスタマイズできるメッセージのことです。詳細（LINEの公式ドキュメント）はこちら。
-
 class LinebotsController < ApplicationController
   require 'line/bot'
 
-  # callbackアクションのCSRFトークン認証を無効
   protect_from_forgery except: [:callback]
 
   def callback
@@ -30,9 +15,7 @@ class LinebotsController < ApplicationController
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
-          # 入力した文字をinputに格納
           input = event.message['text']
-          # search_and_create_messageメソッド内で、楽天APIを用いた商品検索、メッセージの作成を行う
           message = search_and_create_message(input)
           client.reply_message(event['replyToken'], message)
         end
@@ -55,11 +38,8 @@ class LinebotsController < ApplicationController
       c.application_id = ENV['RAKUTEN_APPID']
       c.affiliate_id = ENV['RAKUTEN_AFID']
     end
-    # 楽天の商品検索APIで画像がある商品の中で、入力値で検索して上から3件を取得する
-    # 商品検索+ランキングでの取得はできないため標準の並び順で上から3件取得する
     res = RakutenWebService::Ichiba::Item.search(keyword: input, hits: 3, imageFlag: 1)
     items = []
-    # 取得したデータを使いやすいように配列に格納し直す
     items = res.map{|item| item}
     make_reply_content(items)
   end
