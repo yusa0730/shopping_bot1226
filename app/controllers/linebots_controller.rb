@@ -53,8 +53,8 @@ class LinebotsController < ApplicationController
 
   def search_and_create_message(input)
     RakutenWebService.configure do |c|
-      c.application_id = ENV[]
-      c.affiliate_id = ENV[]
+      c.application_id = ENV['RAKUTEN_APPID']
+      c.affiliate_id = ENV['RAKUTEN_AFID']
     end
     # 楽天の商品検索APIで画像がある商品の中で、入力値で検索して上から3件を取得する
     # 商品検索+ランキングでの取得はできないため標準の並び順で上から3件取得する
