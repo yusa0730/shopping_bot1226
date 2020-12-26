@@ -14,13 +14,12 @@
 
 class LinebotsController < ApplicationController
   require 'line/bot'
-  # このメソッドはCSRF対策しているから大丈夫、しなくても大丈夫、だから外部からリクエストできるようにしたい。
-  # 特定のメソッドだけCSRFの対策をしたくない場合は、そのメソッドのあるコントローラでこんな風に定義します。
+
+  # callbackアクションのCSRFトークン認証を無効
   protect_from_forgery except: [:callback]
 
   def callback
     body = request.body.read
-    # X-Line-Signatureリクエストヘッダーに含まれる署名を検証して、リクエストがLINEプラットフォームから送信されたことを確認する必要があります
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
       return head :bad_request
@@ -123,7 +122,7 @@ class LinebotsController < ApplicationController
           }
         ]
       },
-      "footer":{
+      "footer": {
         "type": "box",
         "layout": "vertical",
         "spacing": "sm",
@@ -131,7 +130,7 @@ class LinebotsController < ApplicationController
           {
             "type": "button",
             "style": "primary",
-            "action":{
+            "action": {
               "type": "uri",
               "label": "楽天市場商品ページへ",
               "uri": url
@@ -139,6 +138,6 @@ class LinebotsController < ApplicationController
           }
         ]
       }
-    }  
+    }
   end
 end
